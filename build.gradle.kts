@@ -98,6 +98,8 @@ subprojects {
                     name.set("MockK for JUnit")
                     url.set("https://github.com/Nillerr/mockk-junit")
 
+                    description.set("MockK for JUnit")
+
                     licenses {
                         license {
                             name.set("MIT")
