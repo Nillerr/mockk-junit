@@ -25,7 +25,9 @@ class MockKExtension : AfterEachCallback {
             .filter { isMockKMock(it) }
             .toTypedArray()
 
-        checkUnnecessaryStub(*mocks)
+        if (mocks.isNotEmpty()) {
+            checkUnnecessaryStub(*mocks)
+        }
     }
 
     companion object {
