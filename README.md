@@ -7,7 +7,7 @@ instances stored in the member properties of the test class the annotation is pr
 
 ```kotlin
 dependencies {
-    implementation("io.github.nillerr:mockk-junit5:1.0.0")
+    implementation("io.github.nillerr:mockk-junit5:1.0.1")
 }
 ```
 
