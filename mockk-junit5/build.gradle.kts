@@ -9,5 +9,5 @@ dependencies {
     implementation("org.junit.jupiter:junit-jupiter-api:5.9.3")
 
     // MockK
-    implementation("io.mockk:mockk:1.13.5")
+    implementation("io.mockk:mockk:1.14.9")
 }

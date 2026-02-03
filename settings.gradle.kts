@@ -7,8 +7,9 @@ pluginManagement {
 
     plugins {
         val kotlinVersion = extra["kotlin.version"] as String
+        val dokkaVersion = extra["dokka.version"] as String
         kotlin("jvm") version kotlinVersion apply false
-        id("org.jetbrains.dokka") version kotlinVersion apply false
+        id("org.jetbrains.dokka") version dokkaVersion apply false
     }
 }
 
