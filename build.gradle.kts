@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -36,7 +37,9 @@ subprojects {
         }
 
         withType<KotlinCompile> {
-            kotlinOptions.jvmTarget = "1.8"
+            compilerOptions {
+                jvmTarget.set(JvmTarget.JVM_21)
+            }
         }
     }
 
@@ -70,8 +73,8 @@ subprojects {
                 }
 
                 credentials {
-                    username = property("sonatype.username") as String
-                    password = property("sonatype.password") as String
+                    username = findProperty("sonatype.username") as String? ?: ""
+                    password = findProperty("sonatype.password") as String? ?: ""
                 }
             }
 
@@ -80,8 +83,8 @@ subprojects {
                 url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
 
                 credentials {
-                    username = property("sonatype.username") as String
-                    password = property("sonatype.password") as String
+                    username = findProperty("sonatype.username") as String? ?: ""
+                    password = findProperty("sonatype.password") as String? ?: ""
                 }
             }
         }
@@ -124,12 +127,13 @@ subprojects {
     }
 
     signing {
-        val keyId = property("io.github.nillerr.signing.key_id") as String
-        val secretKey = property("io.github.nillerr.signing.secret_key") as String
-        val password = property("io.github.nillerr.signing.password") as String
+        val keyId = findProperty("io.github.nillerr.signing.key_id") as String?
+        val secretKey = findProperty("io.github.nillerr.signing.secret_key") as String?
+        val password = findProperty("io.github.nillerr.signing.password") as String?
 
-        useInMemoryPgpKeys(keyId, secretKey, password)
-
-        sign(publishing.publications)
+        if (keyId != null && secretKey != null && password != null) {
+            useInMemoryPgpKeys(keyId, secretKey, password)
+            sign(publishing.publications)
+        }
     }
 }
