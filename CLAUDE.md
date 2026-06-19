@@ -14,11 +14,10 @@ Published as `io.github.nillerr:mockk-junit5` to Maven Central.
 ./gradlew build          # Build the project
 ./gradlew test           # Run all tests
 ./gradlew :mockk-junit5:test --tests "io.github.nillerr.mockk.junit5.MockKExtensionTests.testName"  # Run a single test
-./gradlew publishMavenPublicationToSonatypeRepository          # Publish release to Sonatype staging
-./gradlew publishMavenPublicationToSonatypeSnapshotRepository   # Publish snapshot
+./gradlew publishAndReleaseToMavenCentral   # Publish release to Maven Central
 ```
 
-Publishing requires `sonatype.username`, `sonatype.password`, and PGP signing properties (`io.github.nillerr.signing.key_id`, `io.github.nillerr.signing.secret_key`, `io.github.nillerr.signing.password`) in `~/.gradle/gradle.properties`. After staging, close and release via [Sonatype Nexus](https://s01.oss.sonatype.org/).
+Publishing requires `mavenCentralUsername`, `mavenCentralPassword`, and PGP signing properties (`signingInMemoryKeyId`, `signingInMemoryKey`, `signingInMemoryKeyPassword`) in `~/.gradle/gradle.properties`.
 
 ## Architecture
 
@@ -34,4 +33,4 @@ Tests in `MockKExtensionTests.kt` use JUnit Platform Test Kit (`EngineTestKit`) 
 - Kotlin 2.1.20, JVM target 21
 - MockK 1.14.9, JUnit 5.9.3
 - Dokka 2.1.0 for documentation generation
-- Publishing configured for Sonatype (Maven Central)
+- Publishing via Vanniktech Maven Publish Plugin to Maven Central
