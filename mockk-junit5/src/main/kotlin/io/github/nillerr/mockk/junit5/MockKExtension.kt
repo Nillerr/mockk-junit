@@ -16,18 +16,23 @@ class MockKExtension : AfterEachCallback {
     private val logger = LoggerFactory.getLogger(MockKExtension::class.java)
 
     override fun afterEach(context: ExtensionContext) {
-        val instance: Any = context.requiredTestInstance
-        val type: KClass<*> = context.requiredTestClass.kotlin
-
-        val mocks = type.memberProperties
-            .filterIsInstance<KProperty1<Any, Any?>>()
-            .mapNotNull { property -> getValue(logger, property, instance) }
-            .filter { isMockKMock(it) }
+        // For `@Nested` test classes, `allInstances` returns every enclosing test instance (outermost first)
+        // in addition to the innermost one, so mocks declared in enclosing classes are checked too.
+        val mocks = context.requiredTestInstances.allInstances
+            .flatMap { instance -> getMocks(instance) }
             .toTypedArray()
 
         if (mocks.isNotEmpty()) {
             checkUnnecessaryStub(*mocks)
         }
+    }
+
+    private fun getMocks(instance: Any): List<Any> {
+        val type: KClass<*> = instance::class
+        return type.memberProperties
+            .filterIsInstance<KProperty1<Any, Any?>>()
+            .mapNotNull { property -> getValue(logger, property, instance) }
+            .filter { isMockKMock(it) }
     }
 
     companion object {

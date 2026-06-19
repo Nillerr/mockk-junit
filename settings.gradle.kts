@@ -10,6 +10,8 @@ pluginManagement {
         val dokkaVersion = extra["dokka.version"] as String
         kotlin("jvm") version kotlinVersion apply false
         id("org.jetbrains.dokka") version dokkaVersion apply false
+        id("org.jetbrains.dokka-javadoc") version dokkaVersion apply false
+        id("com.vanniktech.maven.publish") version "0.30.0" apply false
     }
 }
 

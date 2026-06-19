@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.platform.commons.logging.LoggerFactory
 import org.junit.platform.engine.TestExecutionResult
@@ -44,6 +45,69 @@ class MockKExtensionTests {
             .engine("junit-jupiter")
             .configurationParameter("junit.jupiter.conditions.deactivate", "org.junit.*DisabledCondition")
             .selectors(DiscoverySelectors.selectClass(AllGood::class.java))
+            .execute()
+            .testEvents()
+            .succeeded()
+            .stream()
+            .toList()
+
+        // Then
+        assertThat(successes.size).isEqualTo(1)
+    }
+
+    @Test
+    fun `with unnecessary stubs in nested class throws AssertionError`() {
+        // When
+        val failure = EngineTestKit
+            .engine("junit-jupiter")
+            .configurationParameter("junit.jupiter.conditions.deactivate", "org.junit.*DisabledCondition")
+            .selectors(DiscoverySelectors.selectClass(NestedWithUnnecessaryStubs::class.java))
+            .execute()
+            .testEvents()
+            .failed()
+            .stream()
+            .toList()
+            .single()
+
+        // Then
+        assertThat(failure.payload.get()).isInstanceOfSatisfying(TestExecutionResult::class.java) { result ->
+            assertThat(result.status).isEqualTo(TestExecutionResult.Status.FAILED)
+            assertThat(result.throwable.get()).isInstanceOfSatisfying(AssertionError::class.java) { cause ->
+                assertThat(cause).hasMessageStartingWith("Unnecessary stubbings detected.")
+            }
+        }
+    }
+
+    @Test
+    fun `with unnecessary stubs in enclosing class throws AssertionError`() {
+        // When
+        val failure = EngineTestKit
+            .engine("junit-jupiter")
+            .configurationParameter("junit.jupiter.conditions.deactivate", "org.junit.*DisabledCondition")
+            .selectors(DiscoverySelectors.selectClass(EnclosingWithUnnecessaryStubs::class.java))
+            .execute()
+            .testEvents()
+            .failed()
+            .stream()
+            .toList()
+            .single()
+
+        // Then
+        assertThat(failure.payload.get()).isInstanceOfSatisfying(TestExecutionResult::class.java) { result ->
+            assertThat(result.status).isEqualTo(TestExecutionResult.Status.FAILED)
+            assertThat(result.throwable.get()).isInstanceOfSatisfying(AssertionError::class.java) { cause ->
+                assertThat(cause).hasMessageStartingWith("Unnecessary stubbings detected.")
+            }
+        }
+    }
+
+    @Test
+    fun `when everything is okay in nested class then test is successful`() {
+        // When
+        val successes = EngineTestKit
+            .engine("junit-jupiter")
+            .configurationParameter("junit.jupiter.conditions.deactivate", "org.junit.*DisabledCondition")
+            .selectors(DiscoverySelectors.selectClass(NestedAllGood::class.java))
             .execute()
             .testEvents()
             .succeeded()
@@ -175,6 +239,57 @@ class MockKExtensionTests {
         @Test
         fun test() {
             // Nothing
+        }
+    }
+
+    @Disabled
+    @MockKTest
+    class NestedWithUnnecessaryStubs {
+        @Nested
+        inner class Inner {
+            val mockProperty1 = mockk<AutoCloseable>()
+            val mockProperty2 = mockk<AutoCloseable> {
+                every { close() }.returnsMany(Unit)
+            }
+
+            @Test
+            fun test() {
+                // Nothing
+            }
+        }
+    }
+
+    @Disabled
+    @MockKTest
+    class EnclosingWithUnnecessaryStubs {
+        val mockProperty1 = mockk<AutoCloseable>()
+        val mockProperty2 = mockk<AutoCloseable> {
+            every { close() }.returnsMany(Unit)
+        }
+
+        @Nested
+        inner class Inner {
+            @Test
+            fun test() {
+                // Nothing
+            }
+        }
+    }
+
+    @Disabled
+    @MockKTest
+    class NestedAllGood {
+        val enclosingMock = mockk<AutoCloseable>()
+
+        @Nested
+        inner class Inner {
+            val mockProperty1 = mockk<AutoCloseable>()
+            val mockProperty2 = mockk<AutoCloseable>()
+
+            @Test
+            fun test() {
+                // Nothing
+            }
         }
     }
 }
